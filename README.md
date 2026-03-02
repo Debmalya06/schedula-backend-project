@@ -1,1 +1,1 @@
-# -schedula-backend-projecct
+# schedula-backend-project
