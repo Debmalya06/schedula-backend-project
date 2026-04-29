@@ -1,98 +1,115 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ShopPilot AI Shopping Assistant
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Conversational e-commerce demo built with Next.js, TypeScript, Tailwind CSS, and OpenRouter.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- Natural language product search through a chat interface
+- OpenRouter-powered shopping recommendations
+- Budget-based product filtering
+- Image-based product search with multimodal OpenRouter models
+- Demo product catalog with a clear path to vector search
+- Supabase Postgres + pgvector guidance for cloud DB setup
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Run Locally
 
 ```bash
-$ npm install
+npm run dev
 ```
 
-## Compile and run the project
+Open http://localhost:3000.
+
+The OpenRouter key is stored in `.env.local`, which is ignored by git. Because API keys were shared in chat, rotate them before deploying a production app.
+
+## Recommended Database
+
+Use **Supabase Postgres with pgvector**.
+
+Why this DB fits:
+
+- Postgres handles normal e-commerce data: products, users, orders, chats, carts.
+- pgvector stores embeddings for semantic product search.
+- Supabase gives hosted Postgres, auth, storage, row-level security, and an admin dashboard.
+- You can start simple and later add Stripe orders without changing databases.
+
+## Credentials To Provide
+
+Create a project at Supabase, then add these values to `.env.local`:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_MODEL=openai/gpt-4o-mini
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+DATABASE_URL=postgresql://postgres.your-project-ref:password@aws-0-region.pooler.supabase.com:6543/postgres
 ```
 
-## Run tests
+Where to find them:
 
-```bash
-# unit tests
-$ npm run test
+- `OPENROUTER_API_KEY`: OpenRouter dashboard API key
+- `OPENROUTER_MODEL`: OpenRouter model id. Keep a multimodal model if you want image search.
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase Dashboard > Project Settings > API > Project URL
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: Supabase Dashboard > Project Settings > API Keys > Publishable key
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase Dashboard > Project Settings > API > service_role key
+- `DATABASE_URL`: Supabase Dashboard > Project Settings > Database > Connection string
 
-# e2e tests
-$ npm run test:e2e
+Keep `OPENROUTER_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` server-side only. Do not expose them in browser code.
 
-# test coverage
-$ npm run test:cov
+## Starter pgvector Schema
+
+Run this in the Supabase SQL editor after creating the project:
+
+```sql
+create extension if not exists vector;
+
+create table products (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  category text not null,
+  description text not null,
+  price numeric(10, 2) not null,
+  rating numeric(2, 1) default 0,
+  image_url text,
+  tags text[] default '{}',
+  embedding vector(768),
+  created_at timestamptz default now()
+);
+
+create index products_embedding_idx
+on products
+using ivfflat (embedding vector_cosine_ops)
+with (lists = 100);
+
+create table chat_sessions (
+  id uuid primary key default gen_random_uuid(),
+  customer_id text,
+  created_at timestamptz default now()
+);
+
+create table chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid references chat_sessions(id) on delete cascade,
+  role text not null check (role in ('user', 'assistant')),
+  content text not null,
+  created_at timestamptz default now()
+);
 ```
 
-## Deployment
+For embeddings, use an embedding model exposed by your AI provider and store the returned vector in `products.embedding`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Project Structure
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- `src/app/page.tsx`: main shopping assistant UI
+- `src/app/api/chat/route.ts`: OpenRouter chat recommendation endpoint
+- `src/app/api/image-search/route.ts`: OpenRouter image search endpoint
+- `src/lib/products.ts`: demo catalog and local matcher
+- `src/lib/openrouter.ts`: OpenRouter REST helper and prompt builder
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Next Build Steps
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+1. Add Supabase credentials to `.env.local`.
+2. Seed real product data into the `products` table.
+3. Generate embeddings for each product description.
+4. Replace `searchProducts` with a SQL similarity query using pgvector.
+5. Add Stripe checkout when you want real purchasing.
