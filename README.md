@@ -1,115 +1,144 @@
-# ShopPilot AI Shopping Assistant
+# ShopPilot AI
 
-Conversational e-commerce demo built with Next.js, TypeScript, Tailwind CSS, and OpenRouter.
+ShopPilot AI is a conversational e-commerce assistant that helps users discover products through natural language instead of traditional search filters. A user can describe what they need, set a budget, upload a product image, and receive smart product suggestions with short reasons for each recommendation.
 
-## Features
+The project is built around the idea that online shopping should feel more like talking to a helpful store assistant. Instead of forcing users to guess exact keywords or manually compare many products, ShopPilot AI understands intent, checks available products, considers the user's budget, and returns practical recommendations.
 
-- Natural language product search through a chat interface
-- OpenRouter-powered shopping recommendations
-- Budget-based product filtering
-- Image-based product search with multimodal OpenRouter models
-- Demo product catalog with a clear path to vector search
-- Supabase Postgres + pgvector guidance for cloud DB setup
+## Project Value
+
+Most e-commerce websites depend on category menus, search boxes, and manual filtering. That works when users already know what they want, but it becomes slow when the user is exploring, comparing, or shopping with a specific need.
+
+ShopPilot AI improves that experience by letting users ask questions in normal language, such as:
+
+- "Best wireless earbuds for gym under Rs. 12,500"
+- "I need a study desk setup with good lighting"
+- "Find a travel backpack for laptop and weekend trips"
+
+The assistant then turns the request into product matches, ranks the options, and explains the best choices in a simple conversational reply.
+
+## What The Project Does
+
+ShopPilot AI gives users an interactive shopping experience where they can:
+
+- Search products using natural language
+- Get personalized product recommendations
+- Filter suggestions by budget
+- Compare product options with AI-generated reasoning
+- Upload an image and find visually related products
+- View recommended products with price, category, rating, image, and description
+- Use quick prompt examples to try common shopping scenarios
+
+The current version includes a working demo catalog and also supports Supabase product data when database credentials are configured. If the database is unavailable, the app still works with the local demo product catalog.
+
+## Main Features
+
+### Conversational Shopping Chat
+
+Users can type what they are looking for in plain language. The assistant responds with product suggestions and explains why those products fit the user's request.
+
+### Budget-Based Filtering
+
+The budget slider helps users control how much they want to spend. Product results are filtered and ranked with the selected budget in mind, so the recommendations stay realistic.
+
+### Personalized Recommendations
+
+The assistant considers product names, categories, tags, descriptions, ratings, and user intent to recommend items that are more relevant than simple keyword search results.
+
+### Image-Based Product Search
+
+Users can upload a product photo or inspiration image. The app reads the image, converts it into a shopping query, and returns matching product recommendations.
+
+### Recommendation Workflow View
+
+The interface shows the recommendation journey: chat, embed, search, rank, and reply. This makes the AI shopping flow easy to understand from the user's point of view.
+
+### Product Cards
+
+Recommended products are displayed with useful shopping information, including image, name, category, price, description, rating, and reviews.
+
+## Why It Is Useful
+
+ShopPilot AI is useful for shoppers who:
+
+- Know their need but not the exact product name
+- Want recommendations within a fixed budget
+- Need help comparing similar products
+- Prefer asking questions instead of using many filters
+- Want to search using an image or visual inspiration
+
+It is also useful as a project because it demonstrates how AI can make e-commerce more helpful, guided, and user-friendly.
+
+## Example Use Cases
+
+- A student asks for a laptop or desk setup within a budget.
+- A fitness user searches for wireless earbuds for gym use.
+- A traveler looks for a backpack that fits both laptop and weekend travel needs.
+- A buyer uploads an image of a product style and asks the app to find similar items.
+- A shopper compares two or three recommendations before deciding what to buy.
+
+## Tech Used
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- OpenRouter for AI responses and vision-based search
+- Supabase Postgres for product data
+- pgvector / embeddings for vector-search direction
+- Stripe can be added later for checkout and payments
+
+## How It Works
+
+1. The user enters a shopping request or uploads an image.
+2. The app understands the user's intent.
+3. Product data is searched from Supabase or the demo catalog.
+4. Results are filtered by budget and relevance.
+5. OpenRouter generates a helpful shopping reply.
+6. The user sees both the AI explanation and matching product cards.
+
+## Current Status
+
+The project currently works as a conversational shopping assistant demo with:
+
+- Chat-based recommendations
+- Budget control
+- Local demo products
+- Supabase product search support
+- Image upload search
+- AI-generated shopping replies
+
+Future improvements can include real user accounts, saved wishlists, cart management, order history, advanced vector search, and Stripe checkout.
 
 ## Run Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open the app at:
 
-The OpenRouter key is stored in `.env.local`, which is ignored by git. Because API keys were shared in chat, rotate them before deploying a production app.
+```bash
+http://localhost:3000
+```
 
-## Recommended Database
+## Environment Setup
 
-Use **Supabase Postgres with pgvector**.
-
-Why this DB fits:
-
-- Postgres handles normal e-commerce data: products, users, orders, chats, carts.
-- pgvector stores embeddings for semantic product search.
-- Supabase gives hosted Postgres, auth, storage, row-level security, and an admin dashboard.
-- You can start simple and later add Stripe orders without changing databases.
-
-## Credentials To Provide
-
-Create a project at Supabase, then add these values to `.env.local`:
+Create a `.env.local` file for AI and database features:
 
 ```bash
 OPENROUTER_API_KEY=your_openrouter_api_key
 OPENROUTER_MODEL=openai/gpt-4o-mini
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-DATABASE_URL=postgresql://postgres.your-project-ref:password@aws-0-region.pooler.supabase.com:6543/postgres
+OPENROUTER_VISION_MODEL=google/gemini-2.5-flash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
-Where to find them:
-
-- `OPENROUTER_API_KEY`: OpenRouter dashboard API key
-- `OPENROUTER_MODEL`: OpenRouter model id. Keep a multimodal model if you want image search.
-- `NEXT_PUBLIC_SUPABASE_URL`: Supabase Dashboard > Project Settings > API > Project URL
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: Supabase Dashboard > Project Settings > API Keys > Publishable key
-- `SUPABASE_SERVICE_ROLE_KEY`: Supabase Dashboard > Project Settings > API > service_role key
-- `DATABASE_URL`: Supabase Dashboard > Project Settings > Database > Connection string
-
-Keep `OPENROUTER_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` server-side only. Do not expose them in browser code.
-
-## Starter pgvector Schema
-
-Run this in the Supabase SQL editor after creating the project:
-
-```sql
-create extension if not exists vector;
-
-create table products (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  category text not null,
-  description text not null,
-  price numeric(10, 2) not null,
-  rating numeric(2, 1) default 0,
-  image_url text,
-  tags text[] default '{}',
-  embedding vector(768),
-  created_at timestamptz default now()
-);
-
-create index products_embedding_idx
-on products
-using ivfflat (embedding vector_cosine_ops)
-with (lists = 100);
-
-create table chat_sessions (
-  id uuid primary key default gen_random_uuid(),
-  customer_id text,
-  created_at timestamptz default now()
-);
-
-create table chat_messages (
-  id uuid primary key default gen_random_uuid(),
-  session_id uuid references chat_sessions(id) on delete cascade,
-  role text not null check (role in ('user', 'assistant')),
-  content text not null,
-  created_at timestamptz default now()
-);
-```
-
-For embeddings, use an embedding model exposed by your AI provider and store the returned vector in `products.embedding`.
-
-## Project Structure
-
-- `src/app/page.tsx`: main shopping assistant UI
-- `src/app/api/chat/route.ts`: OpenRouter chat recommendation endpoint
-- `src/app/api/image-search/route.ts`: OpenRouter image search endpoint
-- `src/lib/products.ts`: demo catalog and local matcher
-- `src/lib/openrouter.ts`: OpenRouter REST helper and prompt builder
-
-## Next Build Steps
-
-1. Add Supabase credentials to `.env.local`.
-2. Seed real product data into the `products` table.
-3. Generate embeddings for each product description.
-4. Replace `searchProducts` with a SQL similarity query using pgvector.
-5. Add Stripe checkout when you want real purchasing.
+The app can still run with demo products if Supabase is not configured.
